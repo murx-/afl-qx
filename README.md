@@ -25,6 +25,6 @@ Legend:
 
 ## Examples
 
-![Diff View](https://github.com/murx-/afl-qx/blob/master/images/diff.png)
+![Diff View](https://github.com/murx-/afl-qx/blob/main/images/diff.png)
 
-![Hexdump View](https://github.com/murx-/afl-qx/blob/master/images/hexdump.png)
+![Hexdump View](https://github.com/murx-/afl-qx/blob/main/images/hexdump.png)
