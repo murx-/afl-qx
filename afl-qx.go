@@ -200,7 +200,6 @@ func export_to_sigma_json(queue_files []QueueFile) (string) {
 }
 
 func (AflExp *AflExporer) data(w http.ResponseWriter, req *http.Request) {
-	//all := parse_fuzzer_instance("/home/till/Documents/studium/201920_WiSe/FuE/cov_bench/all//untracer/untracer_2_2020-05-11T08:14:08+00:00/")
 	fmt.Println(AflExp.RootFolder)
 	all := parse_fuzzer_instance(AflExp.RootFolder)
 	json := export_to_sigma_json(all)
