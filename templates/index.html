@@ -168,7 +168,6 @@
         }
     });
 
-
     s.startForceAtlas2(
         {
             linLogMode: false,
@@ -181,7 +180,8 @@
 
 
 
-    window.setTimeout(function() {s.killForceAtlas2()}, 25000);
+    //window.setTimeout(function() {s.killForceAtlas2()}, 25000);
+    window.setTimeout(function() {s.killForceAtlas2()}, (g['nodes'].length * 30));
 
     s.bind('clickNode', function(e) {
         loadHexDump(e.data.node.label)
