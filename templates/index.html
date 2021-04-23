@@ -49,12 +49,18 @@
     <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/src/misc/sigma.misc.bindDOMEvents.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/src/misc/sigma.misc.drawHovers.js"></script>
 
+
     <!-- Force Atlas -->
     <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/plugins/sigma.layout.forceAtlas2/worker.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/plugins/sigma.layout.forceAtlas2/supervisor.js"></script>
 
     <!-- Neighboorhood -->
     <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/plugins/sigma.plugins.neighborhoods/sigma.plugins.neighborhoods.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/plugins/sigma.layout.forceAtlas2/worker.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/plugins/sigma.layout.forceAtlas2/supervisor.js"></script>
+
+
     <!-- END SIGMA IMPORTS -->
 
 
@@ -104,18 +110,23 @@
             <div id="graph-container"></div>
         </div>
 
+
         <button onclick="adjustSize()">Adjust Node Size</button>
         <button onclick="removeNodes()">Remove Nodes</button>
         <button onclick="coalesceEdges()">Coalesce Edges</button>
+
 
         <div class="column" id="FileView">
             <p>Click nodes or edges to inspect them</p>
         </div>
 
+    </div>
+
 
 
 
 <script>
+
 
     sigma.classes.graph.addMethod('neighbors', function(nodeId) {
         var k,
@@ -127,6 +138,7 @@
 
         return neighbors;
     });
+
 
     function loadHexDump(node) {
         request = new XMLHttpRequest;
@@ -185,6 +197,7 @@
             edgeHoverExtremities: true,
         }
     });
+
 
     forceAtlas();
 
@@ -270,6 +283,7 @@ function forceAtlas() {
     // Force Atlas might be running due to some othe event
     s.killForceAtlas2()
 
+
     s.startForceAtlas2(
         {
             linLogMode: false,
@@ -281,12 +295,16 @@ function forceAtlas() {
     );
 
 
+
     //window.setTimeout(function() {s.killForceAtlas2()}, 25000);
     window.setTimeout(function () {
         s.killForceAtlas2()
     }, (g['nodes'].length * 30));
     // do some logging and make timeout sameller maybe / capped!
 }
+
+    window.setTimeout(function() {s.killForceAtlas2()}, 25000);
+
 
     s.bind('clickNode', function(e) {
         loadHexDump(e.data.node.label)

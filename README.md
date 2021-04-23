@@ -25,6 +25,9 @@ Legend:
 
 ## Examples
 
+
+An example using djpeg:
+
 ![Diff View](https://github.com/murx-/afl-qx/blob/main/images/diff.png)
 
 ![Hexdump View](https://github.com/murx-/afl-qx/blob/main/images/hexdump.png)
