@@ -48,9 +48,13 @@
     <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/src/misc/sigma.misc.bindEvents.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/src/misc/sigma.misc.bindDOMEvents.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/src/misc/sigma.misc.drawHovers.js"></script>
+
+    <!-- Force Atlas -->
     <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/plugins/sigma.layout.forceAtlas2/worker.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/plugins/sigma.layout.forceAtlas2/supervisor.js"></script>
 
+    <!-- Neighboorhood -->
+    <script src="https://cdn.jsdelivr.net/npm/sigma@1.2.1/plugins/sigma.plugins.neighborhoods/sigma.plugins.neighborhoods.js"></script>
     <!-- END SIGMA IMPORTS -->
 
 
@@ -100,15 +104,29 @@
             <div id="graph-container"></div>
         </div>
 
+        <button onclick="adjustSize()">Adjust Node Size</button>
+        <button onclick="removeNodes()">Remove Nodes</button>
+        <button onclick="coalesceEdges()">Coalesce Edges</button>
 
         <div class="column" id="FileView">
             <p>Click nodes or edges to inspect them</p>
         </div>
-    </div>
+
 
 
 
 <script>
+
+    sigma.classes.graph.addMethod('neighbors', function(nodeId) {
+        var k,
+            neighbors = {},
+            index = this.allNeighborsIndex[nodeId] || {};
+
+        for (k in index)
+            neighbors[k] = this.nodesIndex[k];
+
+        return neighbors;
+    });
 
     function loadHexDump(node) {
         request = new XMLHttpRequest;
@@ -168,6 +186,90 @@
         }
     });
 
+    forceAtlas();
+
+function adjustSize() {
+    // different node sizes depending on child nodes
+    s.graph.nodes().forEach(function (n) {
+        n.size = 1 + Math.log(1 + s.graph.degree(n['id'], 'out'));
+        //n.size = 1 + Math.log(s.graph.degree(n['id'], 'out') + 0.00001);
+        //n.viz.size = n.viz.size * s.graph.degree(n['id'], 'out');
+    });
+    s.refresh();
+}
+
+function removeNodes() {
+    // remove nodes that have no children and parent is root node
+    var root_nodes = [];
+    s.graph.nodes().forEach(function (n) {
+        //console.log(n);
+        if (s.graph.degree(n['id'], 'in') == 0) {
+            root_nodes.push(n['id'])
+            //console.log(s.graph.edges(n['id']));
+        }
+    });
+
+    console.log(s.graph.nodes().length);
+    //console.log(root_nodes)
+    s.graph.edges().forEach(function (e) {
+        //console.log(e);
+        // check if parent if root node
+        if (root_nodes.includes(e['source'])
+            // check if it has no children
+            && s.graph.degree(e['target'], 'out') == 0
+            // check if root node was not combined with another node
+            && s.graph.degree(e['target'], 'in') == 1) {
+            s.graph.dropNode(e['target']);
+
+            //s.graph.nodes(e['target']).color ="#000000";
+        }
+    });
+
+    console.log(s.graph.nodes().length);
+
+    s.refresh();
+    forceAtlas();
+}
+
+function coalesceEdges() {
+    // test coalesce edges
+    // if a node has only one child and only one parent we want to coalesce the surrounding edges.
+
+    var db = new sigma.plugins.neighborhoods();
+    //console.log(g)
+    //db.load("/data.json")
+
+    var intermediate_nodes = [];
+    s.graph.nodes().forEach(function (n) {
+        //console.log(n);
+        if (s.graph.degree(n['id'], 'in') == 1 && s.graph.degree(n['id'], 'out') == 1) {
+            intermediate_nodes.push(n['id'])
+            var neighbors = s.graph.neighbors(n['id'])
+            neighbors = Object.keys(neighbors);
+
+            var newEdge = {
+                id : neighbors[0]+neighbors[1],
+                source: neighbors[0],
+                target: neighbors[1],
+            }
+
+            console.log(newEdge);
+
+            s.graph.addEdge(newEdge);
+            s.graph.dropNode(n['id']);
+            console.log("Removed one")
+        }
+    });
+
+    s.refresh();
+    forceAtlas();
+}
+
+
+function forceAtlas() {
+    // Force Atlas might be running due to some othe event
+    s.killForceAtlas2()
+
     s.startForceAtlas2(
         {
             linLogMode: false,
@@ -179,9 +281,12 @@
     );
 
 
-
     //window.setTimeout(function() {s.killForceAtlas2()}, 25000);
-    window.setTimeout(function() {s.killForceAtlas2()}, (g['nodes'].length * 30));
+    window.setTimeout(function () {
+        s.killForceAtlas2()
+    }, (g['nodes'].length * 30));
+    // do some logging and make timeout sameller maybe / capped!
+}
 
     s.bind('clickNode', function(e) {
         loadHexDump(e.data.node.label)
